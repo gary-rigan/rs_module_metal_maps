@@ -99,7 +99,6 @@ cRobsysModuleMetalMapsImpl::cRobsysModuleMetalMapsImpl(const str::cStringArg cfg
        LLOG(FATAL,"Create occupied map publisher results null");
     }
     _chg_map_srv = create_rpc_server(_option.Srv_change_map,&cRobsysModuleMetalMapsImpl::change_map_srv_callback,this);
-
 }
 cRobsysModuleMetalMapsImpl::~cRobsysModuleMetalMapsImpl() {
 
