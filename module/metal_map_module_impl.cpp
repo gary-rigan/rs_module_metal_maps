@@ -66,6 +66,10 @@ int map_unit_t::load(int id,const std::string& path) {
     }
     _current_id = id;
 
+    this->_costmap   ->id() = id;
+    this->_gridmap   ->id() = id;
+    this->_pointcloud->id() = id;
+
     return ROBSYS_SUCCESSED;
 }
 
@@ -152,10 +156,8 @@ void cRobsysModuleMetalMapsImpl::map_update() {
                 LLOG(ERROR,"Publish map failed,costmap gridmap or pointcloud map is null,this should not be happen");
                 continue;
             }
-
-
-            message::cMsgOccupMap::shared_ptr_t  costmap =_map_current->_costmap;
-            message::cMsgOccupMap::shared_ptr_t  gridmap =_map_current->_gridmap;
+            message::cMsgOccupMap::shared_ptr_t  costmap   =_map_current->_costmap;
+            message::cMsgOccupMap::shared_ptr_t  gridmap   =_map_current->_gridmap;
             message::cMsgCloudsI3d::shared_ptr_t pointcloud=_map_current->_pointcloud;
             _pub_map_pts ->swap_publish( pointcloud);
             _pub_map_cost->swap_publish( costmap);
@@ -191,11 +193,8 @@ int cRobsysModuleMetalMapsImpl::change_map_srv_callback(const message::cMsgObjec
     }
     ++_current_seq;
     _map_cache->_costmap->seq()   =_current_seq;
-    _map_cache->_costmap-> id()   = 0;
     _map_cache->_gridmap->seq()   =_current_seq;
-    _map_cache->_gridmap-> id()   = 0;
-    _map_cache->_pointcloud->seq() =_current_seq;
-    _map_cache->_pointcloud-> id() = 0;
+    _map_cache->_pointcloud->seq()=_current_seq;
 
     {
         threads::cLockGuard l(&_mtx);
