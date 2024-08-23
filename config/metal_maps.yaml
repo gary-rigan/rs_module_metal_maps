@@ -10,5 +10,5 @@ Publish_freq: 1.0
 change_map_srv:  "Srv-change-map"
 Pts_map_topic:   "Map-pts"
 Grid_map_topic:  "Map-grid"
-Occup_map_topic: "Map-cost"
+Cost_map_topic:  "Map-cost"
 

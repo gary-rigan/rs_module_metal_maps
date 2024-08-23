@@ -15,8 +15,8 @@ int map_unit_t::load(int id,const std::string& path) {
         return ROBSYS_SUCCESSED;
     }
 
-    this->_costmap   .reset(new message::cMsgOccupMap);
-    this->_gridmap   .reset(new message::cMsgOccupMap);
+    this->_costmap   .reset(new message::cMsgOccupMap) ;
+    this->_gridmap   .reset(new message::cMsgOccupMap) ;
     this->_pointcloud.reset(new message::cMsgCloudsI3d);
     std::string  costmap_path = path + "/"  +  k_map2d_name_cost;
     std::string  gridmap_path = path + "/"  +  k_map2d_name_occupied;
@@ -85,15 +85,15 @@ cRobsysModuleMetalMapsImpl::cRobsysModuleMetalMapsImpl(const str::cStringArg cfg
     }
     show_option(_option);
 
-    _pub_map_pts = create_publisher<message::cMsgCloudsI3d>(_option.Pts_map_topic,3);
+    _pub_map_pts = create_publisher<message::cMsgCloudsI3d>(_option.Pts_map_topic,2);
     if(_pub_map_pts == nullptr) {
         LLOG(FATAL,"Map herer");
     }
-    _pub_map_grid=create_publisher<message::cMsgOccupMap,message::cPropOccupMap>(_option.Grid_map_topic);
+    _pub_map_grid=create_publisher<message::cMsgOccupMap,message::cPropOccupMap>(_option.Grid_map_topic,2);
     if(_pub_map_grid == nullptr) {
        LLOG(FATAL,"Create occupied map publisher results null");
     }
-    _pub_map_cost=create_publisher<message::cMsgOccupMap,message::cPropOccupMap>(_option.Cost_map_topic);
+    _pub_map_cost=create_publisher<message::cMsgOccupMap,message::cPropOccupMap>(_option.Cost_map_topic,2);
 
     if(_pub_map_cost == nullptr) {
        LLOG(FATAL,"Create occupied map publisher results null");
@@ -118,7 +118,7 @@ cRobsysModuleMetalMapsImpl::~cRobsysModuleMetalMapsImpl() {
 
 bool cRobsysModuleMetalMapsImpl::start() {
     _update_thread = new threads::cThreadPthread<std::function<void()>> (
-                                       std::bind(&cRobsysModuleMetalMapsImpl::map_update,this),0,name()
+                                       std::bind(&cRobsysModuleMetalMapsImpl::map_update,this),0,"mtl-map"
                                                                            );
 
     if(_update_thread == nullptr) {
@@ -144,6 +144,7 @@ bool cRobsysModuleMetalMapsImpl::is_normal()  {
 void cRobsysModuleMetalMapsImpl::map_update() {
     times::cSleeperConstRate rate(_option.publish_freq);
     while (true) {
+        rate.sleep();
         {
             threads::cLockGuard l(&_mtx);
             if(!_map_current) {
@@ -158,11 +159,11 @@ void cRobsysModuleMetalMapsImpl::map_update() {
             message::cMsgOccupMap::shared_ptr_t  costmap   =_map_current->_costmap;
             message::cMsgOccupMap::shared_ptr_t  gridmap   =_map_current->_gridmap;
             message::cMsgCloudsI3d::shared_ptr_t pointcloud=_map_current->_pointcloud;
+
             _pub_map_pts ->swap_publish( pointcloud);
             _pub_map_cost->swap_publish( costmap);
             _pub_map_grid->swap_publish( gridmap);
         }
-        rate.sleep();
     }
 }
 int cRobsysModuleMetalMapsImpl::change_map_srv_callback(const message::cMsgObject6Dof& pose,int& res) {

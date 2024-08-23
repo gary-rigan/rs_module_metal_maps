@@ -24,7 +24,7 @@ int load_option_from_yaml(str::cStringArg str,cRobsysModuleMetalMapsImpl::option
     opt.Srv_change_map  = node["change_map_srv"] .as<std::string>();
     opt.Pts_map_topic   = node["Pts_map_topic"]  .as<std::string>();
     opt.Grid_map_topic  = node["Grid_map_topic"] .as<std::string>();
-    opt.Cost_map_topic  = node["Occup_map_topic"].as<std::string>();
+    opt.Cost_map_topic  = node["Cost_map_topic"].as<std::string>();
 
 
     YAML::Node maps = node["maps"];
